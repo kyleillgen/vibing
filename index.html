@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Monkey Game</title>
+  <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+  <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+<body>
+  <canvas id="game" width="800" height="600"></canvas>
+  <py-script>
+from powerups import PowerUpManager
+import js, time
+
+manager = PowerUpManager()
+js.window.powerUpManager = manager
+
+
+def update(*args):
+    manager.update(time.time())
+    js.window.requestAnimationFrame(update)
+
+js.window.requestAnimationFrame(update)
+  </py-script>
+</body>
+</html>
