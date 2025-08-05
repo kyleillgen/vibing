@@ -1,16 +1,23 @@
 # vibing
+
 Vibe Coded Garbage
 
 ## Running Locally
 
-Install dependencies (none yet) and start the script:
+Open `index.html` directly in a browser or start a simple static server:
 
 ```
-npm install
-npm start
+python -m http.server
 ```
+
+Then browse to `http://localhost:8000`.
+
+## GitHub Pages
+
+This repository is ready for GitHub Pages. Once published, visiting the
+project's GitHub Pages URL will load `index.html` and start the game.
 
 ## GitHub Actions
 
-This repository includes a simple GitHub Actions workflow that runs the
-script on every push and pull request. See `.github/workflows/run.yml` for details.
+A lightweight workflow checks that the site files exist on every push and
+pull request. See `.github/workflows/run.yml` for details.
