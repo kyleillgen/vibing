@@ -22,6 +22,52 @@
 
     let squashes = [];
 
+    const POWER_UP_RADIUS = 20;
+    const SPAWN_INTERVAL = 30000; // ms
+
+    const POWER_UP_DEFS = [
+      ["Mega Multiplier", "Multiply all points by five."],
+      ["Golden Banana", "Each hit grants a massive score bonus."],
+      ["Combo Frenzy", "Combo meter builds twice as fast."],
+      ["Fever Time", "Triple points for every beat."],
+      ["Perfect Shield", "Misses do not break your combo."],
+      ["Tempo Boost", "Slightly faster tempo for more scoring chances."],
+      ["Time Warp", "Slows beat scroll speed."],
+      ["Streak Saver", "Automatically saves the next missed beat."],
+      ["Banana Magnet", "Nearby bananas fly toward you."],
+      ["Score Burst", "Periodic bursts of bonus points."],
+      ["Groove Guard", "Blocks the next obstacle."],
+      ["Beat Freeze", "Freezes beats briefly on activation."],
+      ["Drum Echo", "Each hit echoes for an extra score tick."],
+      ["Banana Bloom", "Spawns extra bananas to catch."],
+      ["Rhythm Rush", "More beats spawn for a short time."],
+      ["Monkey March", "Auto-hits basic beats."],
+      ["Tap Booster", "Temporarily enlarges the hit box."],
+      ["Beat Bonus", "Adds a small bonus to every beat."],
+      ["Banana Trick", "Random small bonus each hit."],
+      ["Happy Hour", "Slight constant score buff."]
+    ];
+
+    function tierForRank(rank) {
+      if (rank <= 3) return { tier: "Legendary", color: "#FF8000", duration: 45 };
+      if (rank <= 7) return { tier: "Epic", color: "#A335EE", duration: 35 };
+      if (rank <= 12) return { tier: "Rare", color: "#0070FF", duration: 30 };
+      if (rank <= 16) return { tier: "Uncommon", color: "#1EFF00", duration: 25 };
+      return { tier: "Common", color: "#BEBEBE", duration: 20 };
+    }
+
+    const POWER_UPS = POWER_UP_DEFS.map(([name, effect], i) => {
+      const rank = i + 1;
+      const { tier, color, duration } = tierForRank(rank);
+      return { name, effect, rank, tier, color, duration };
+    });
+
+    let spawnPowerUp = null;
+    let activePowerUp = null;
+    let activeEndsAt = 0;
+    let nextPowerUpTime = 0;
+    let scoreMultiplier = 1;
+
     function setup() {
       createCanvas(500, 500);
       textAlign(CENTER, CENTER);
@@ -30,6 +76,7 @@
       for (let i = 0; i < 5; i++) {
         flies.push(createFly());
       }
+      nextPowerUpTime = millis() + SPAWN_INTERVAL;
     }
 
     function draw() {
@@ -49,7 +96,7 @@
             timestamp: millis()
           });
 
-          score += 10;
+          score += Math.floor(10 * scoreMultiplier);
           flies.splice(i, 1);
           flies.push(createFlyFromEdge());
         } else if (flyEscaped(flies[i])) {
@@ -60,6 +107,7 @@
 
       drawHands();
       drawSquashes();
+      updatePowerUps();
 
       // Score
       fill(0);
@@ -168,19 +216,81 @@
       return dist(fly.x, fly.y, handX, handY) < 30;
     }
 
-    function drawSquashes() {
-      let now = millis();
-      for (let i = squashes.length - 1; i >= 0; i--) {
-        let s = squashes[i];
-        if (now - s.timestamp < 1000) {
-          fill(255, 0, 0);
-          textSize(20);
-          text("💥 SQUASH!", s.x, s.y);
-        } else {
-          squashes.splice(i, 1);
+      function drawSquashes() {
+        let now = millis();
+        for (let i = squashes.length - 1; i >= 0; i--) {
+          let s = squashes[i];
+          if (now - s.timestamp < 1000) {
+            fill(255, 0, 0);
+            textSize(20);
+            text("💥 SQUASH!", s.x, s.y);
+          } else {
+            squashes.splice(i, 1);
+          }
         }
       }
-    }
+
+      function updatePowerUps() {
+        const now = millis();
+
+        if (activePowerUp && now > activeEndsAt) {
+          activePowerUp = null;
+          scoreMultiplier = 1;
+          nextPowerUpTime = now + SPAWN_INTERVAL;
+        }
+
+        if (!spawnPowerUp && !activePowerUp && now > nextPowerUpTime) {
+          spawnPowerUp = createPowerUp();
+        }
+
+        if (spawnPowerUp) {
+          noStroke();
+          fill(spawnPowerUp.color);
+          ellipse(spawnPowerUp.x, spawnPowerUp.y, POWER_UP_RADIUS * 2);
+          if (isClapping && dist(spawnPowerUp.x, spawnPowerUp.y, handX, handY) < POWER_UP_RADIUS + 10) {
+            activePowerUp = spawnPowerUp;
+            activeEndsAt = now + activePowerUp.duration * 1000;
+            scoreMultiplier = multiplierForTier(activePowerUp.tier);
+            spawnPowerUp = null;
+          }
+        }
+
+        if (activePowerUp) {
+          fill(0);
+          textAlign(CENTER, TOP);
+          textSize(16);
+          text("Power-Up: " + activePowerUp.name, width / 2, 10);
+        }
+      }
+
+      function createPowerUp() {
+        const weights = POWER_UPS.map(p => Math.log(p.rank + 1));
+        const total = weights.reduce((a, b) => a + b, 0);
+        let r = random(total);
+        let cumulative = 0;
+        for (let i = 0; i < POWER_UPS.length; i++) {
+          cumulative += weights[i];
+          if (r < cumulative) {
+            return { ...POWER_UPS[i], x: random(width), y: random(height) };
+          }
+        }
+        return null;
+      }
+
+      function multiplierForTier(tier) {
+        switch (tier) {
+          case "Legendary":
+            return 5;
+          case "Epic":
+            return 4;
+          case "Rare":
+            return 3;
+          case "Uncommon":
+            return 2;
+          default:
+            return 1.5;
+        }
+      }
   </script>
 </body>
 </html>
