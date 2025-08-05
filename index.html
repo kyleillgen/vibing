@@ -211,97 +211,102 @@
       return dist(fly.x, fly.y, handX, handY) < clapRadius;
     }
 
-      function drawSquashes() {
-        let now = millis();
-        for (let i = squashes.length - 1; i >= 0; i--) {
-          let s = squashes[i];
-          if (now - s.timestamp < 1000) {
-            fill(255, 0, 0);
-            textSize(20);
-            text("💥 SQUASH!", s.x, s.y);
-          } else {
-            squashes.splice(i, 1);
-          }
+    function drawSquashes() {
+      let now = millis();
+      for (let i = squashes.length - 1; i >= 0; i--) {
+        let s = squashes[i];
+        if (now - s.timestamp < 1000) {
+          fill(255, 0, 0);
+          textSize(20);
+          text("💥 SQUASH!", s.x, s.y);
+        } else {
+          squashes.splice(i, 1);
+        }
+      }
+    }
+
+    function updatePowerUps() {
+      const now = millis();
+
+      if (activePowerUp && now > activeEndsAt) {
+        clearPowerUpEffects();
+        activePowerUp = null;
+        nextPowerUpTime = now + SPAWN_INTERVAL;
+      }
+
+      if (!spawnPowerUp && !activePowerUp && now > nextPowerUpTime) {
+        spawnPowerUp = createPowerUp();
+      }
+
+      if (spawnPowerUp) {
+        noStroke();
+        fill(spawnPowerUp.color);
+        ellipse(spawnPowerUp.x, spawnPowerUp.y, POWER_UP_RADIUS * 2);
+        if (isClapping && dist(spawnPowerUp.x, spawnPowerUp.y, handX, handY) < POWER_UP_RADIUS + 10) {
+          activePowerUp = spawnPowerUp;
+          activeEndsAt = now + Math.min(activePowerUp.duration, 5) * 1000;
+          applyPowerUp(activePowerUp);
+          spawnPowerUp = null;
         }
       }
 
-      function updatePowerUps() {
-        const now = millis();
+      if (activePowerUp) {
+        const remaining = Math.max(0, activeEndsAt - now);
+        fill(0);
+        textAlign(CENTER, TOP);
+        textSize(16);
+        // Display whole seconds remaining for the active power-up.
+        text(
+          "Power-Up: " +
+            activePowerUp.name +
+            " (" + Math.ceil(remaining / 1000) + "s)",
+          width / 2,
+          10
+        );
+      }
+    }
 
-        if (activePowerUp && now > activeEndsAt) {
-          activePowerUp = null;
-          scoreMultiplier = DEFAULT_SCORE_MULTIPLIER;
-          handSpeed = DEFAULT_HAND_SPEED;
-          clapRadius = DEFAULT_CLAP_RADIUS;
-          fliesFrozen = false;
-          nextPowerUpTime = now + SPAWN_INTERVAL;
-        }
-
-        if (!spawnPowerUp && !activePowerUp && now > nextPowerUpTime) {
-          spawnPowerUp = createPowerUp();
-        }
-
-        if (spawnPowerUp) {
-          noStroke();
-          fill(spawnPowerUp.color);
-          ellipse(spawnPowerUp.x, spawnPowerUp.y, POWER_UP_RADIUS * 2);
-          if (isClapping && dist(spawnPowerUp.x, spawnPowerUp.y, handX, handY) < POWER_UP_RADIUS + 10) {
-            activePowerUp = spawnPowerUp;
-            activeEndsAt = now + Math.min(activePowerUp.duration, 5) * 1000;
-            applyPowerUp(activePowerUp);
-            spawnPowerUp = null;
-          }
-        }
-
-        if (activePowerUp) {
-          const remaining = Math.max(0, activeEndsAt - now);
-          fill(0);
-          textAlign(CENTER, TOP);
-          textSize(16);
-          // Display whole seconds remaining for the active power-up.
-          text(
-            "Power-Up: " +
-              activePowerUp.name +
-              " (" + Math.ceil(remaining / 1000) + "s)",
-            width / 2,
-            10
-          );
+    function createPowerUp() {
+      const weights = POWER_UPS.map(p => p.rarity);
+      const total = weights.reduce((a, b) => a + b, 0);
+      let r = random(total);
+      let cumulative = 0;
+      for (let i = 0; i < POWER_UPS.length; i++) {
+        cumulative += weights[i];
+        if (r < cumulative) {
+          return { ...POWER_UPS[i], x: random(width), y: random(height) };
         }
       }
+      return null;
+    }
 
-      function createPowerUp() {
-        const weights = POWER_UPS.map(p => p.rarity);
-        const total = weights.reduce((a, b) => a + b, 0);
-        let r = random(total);
-        let cumulative = 0;
-        for (let i = 0; i < POWER_UPS.length; i++) {
-          cumulative += weights[i];
-          if (r < cumulative) {
-            return { ...POWER_UPS[i], x: random(width), y: random(height) };
-          }
-        }
-        return null;
-      }
+    function clearPowerUpEffects() {
+      scoreMultiplier = DEFAULT_SCORE_MULTIPLIER;
+      handSpeed = DEFAULT_HAND_SPEED;
+      clapRadius = DEFAULT_CLAP_RADIUS;
+      fliesFrozen = false;
+    }
 
-      function applyPowerUp(powerUp) {
-        switch (powerUp.name) {
-          case "Score Frenzy":
-            scoreMultiplier = 5;
-            break;
-          case "Score Doubler":
-            scoreMultiplier = 2;
-            break;
-          case "Time Freeze":
-            fliesFrozen = true;
-            break;
-          case "Clap Magnet":
-            clapRadius = DEFAULT_CLAP_RADIUS * 2;
-            break;
-          case "Quick Hands":
-            handSpeed = DEFAULT_HAND_SPEED * 1.5;
-            break;
-        }
+    function applyPowerUp(powerUp) {
+      clearPowerUpEffects();
+      switch (powerUp.name) {
+        case "Score Frenzy":
+          scoreMultiplier = 5;
+          break;
+        case "Score Doubler":
+          scoreMultiplier = 2;
+          break;
+        case "Time Freeze":
+          fliesFrozen = true;
+          break;
+        case "Clap Magnet":
+          clapRadius = DEFAULT_CLAP_RADIUS * 2;
+          break;
+        case "Quick Hands":
+          handSpeed = DEFAULT_HAND_SPEED * 1.5;
+          break;
       }
+    }
   </script>
 </body>
 </html>
