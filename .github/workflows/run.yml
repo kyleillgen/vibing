@@ -1,16 +1,13 @@
-name: Run Node app
+name: Static site check
 
 on:
   push:
   pull_request:
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: npm install
-      - run: npm start
+      - name: Ensure index.html exists
+        run: test -f index.html
