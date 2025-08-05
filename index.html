@@ -237,7 +237,7 @@
           ellipse(spawnPowerUp.x, spawnPowerUp.y, POWER_UP_RADIUS * 2);
           if (isClapping && dist(spawnPowerUp.x, spawnPowerUp.y, handX, handY) < POWER_UP_RADIUS + 10) {
             activePowerUp = spawnPowerUp;
-            activeEndsAt = now + Math.min(activePowerUp.duration, 5) * 1000;
+            activeEndsAt = now + activePowerUp.duration * 1000;
             scoreMultiplier = multiplierForTier(activePowerUp.tier);
             spawnPowerUp = null;
           }
