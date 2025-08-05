@@ -1,0 +1,2 @@
+# vibing
+Vibe Coded Garbage
