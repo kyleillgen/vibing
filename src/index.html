@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Monkey Fly-Squash Game</title>
+  <!-- Load p5.js from the official CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"
+          integrity="sha512-RTTUca0nS2WLvIDWl5hzT5o+Avr8nsgxebl44LPQcDsjB7grTBek28uqAzTA5iAn4pPw2DJqW85DNsxx9aNIPw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <script>
+    let flies = [];
+    let score = 0;
+    let isClapping = false;
+
+    let handX = 250;
+    let handY = 250;
+    let handSpeed = 4;
+
+    let squashes = [];
+
+    function setup() {
+      createCanvas(500, 500);
+      textAlign(CENTER, CENTER);
+      angleMode(DEGREES);
+
+      for (let i = 0; i < 5; i++) {
+        flies.push(createFly());
+      }
+    }
+
+    function draw() {
+      background(255, 239, 200);
+      handleKeys();
+
+      drawMonkey();
+
+      for (let i = flies.length - 1; i >= 0; i--) {
+        moveFly(flies[i]);
+        drawFly(flies[i]);
+
+        if (isClapping && flyInClapZone(flies[i])) {
+          squashes.push({
+            x: flies[i].x,
+            y: flies[i].y,
+            timestamp: millis()
+          });
+
+          score += 10;
+          flies.splice(i, 1);
+          flies.push(createFlyFromEdge());
+        } else if (flyEscaped(flies[i])) {
+          flies.splice(i, 1);
+          flies.push(createFlyFromEdge());
+        }
+      }
+
+      drawHands();
+      drawSquashes();
+
+      // Score
+      fill(0);
+      textSize(20);
+      textAlign(RIGHT, TOP);
+      text("Score: " + score, width - 10, 10);
+    }
+
+    function drawMonkey() {
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      fill(160, 82, 45);
+      ellipse(centerX, centerY, 200, 200);
+
+      fill(0);
+      ellipse(centerX - 30, centerY - 20, 20, 20);
+      ellipse(centerX + 30, centerY - 20, 20, 20);
+
+      noFill();
+      stroke(0);
+      strokeWeight(3);
+      arc(centerX, centerY + 30, 60, 30, 0, PI);
+    }
+
+    function drawHands() {
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      noStroke();
+      fill(160, 82, 45);
+
+      if (isClapping) {
+        ellipse(handX, handY, 40, 40);
+        ellipse(handX, handY, 40, 40); // both at same position
+        fill(255, 0, 0);
+        textSize(24);
+        text("👏", handX, handY - 40);
+      } else {
+        // Show hands apart (symmetric around monkey center)
+        let dx = handX - centerX;
+        let dy = handY - centerY;
+
+        ellipse(centerX + dx, centerY + dy, 30, 30); // right hand
+        ellipse(centerX - dx, centerY - dy, 30, 30); // left hand
+      }
+    }
+
+    function handleKeys() {
+      if (keyIsDown(LEFT_ARROW)) handX -= handSpeed;
+      if (keyIsDown(RIGHT_ARROW)) handX += handSpeed;
+      if (keyIsDown(UP_ARROW)) handY -= handSpeed;
+      if (keyIsDown(DOWN_ARROW)) handY += handSpeed;
+
+      handX = constrain(handX, 0, width);
+      handY = constrain(handY, 0, height);
+
+      isClapping = keyIsDown(65); // 'A'
+    }
+
+    function createFly() {
+      return {
+        x: random(width),
+        y: random(height),
+        size: 12,
+        dx: random([-1, 1]) * random(2, 4),
+        dy: random([-1, 1]) * random(2, 4),
+        bounce: random() < 0.5
+      };
+    }
+
+    function createFlyFromEdge() {
+      let edge = floor(random(4));
+      let fly = createFly();
+
+      switch (edge) {
+        case 0: fly.x = random(width); fly.y = 0; break;
+        case 1: fly.x = width; fly.y = random(height); break;
+        case 2: fly.x = random(width); fly.y = height; break;
+        case 3: fly.x = 0; fly.y = random(height); break;
+      }
+
+      return fly;
+    }
+
+    function moveFly(fly) {
+      fly.x += fly.dx;
+      fly.y += fly.dy;
+
+      if (fly.bounce) {
+        if (fly.x < 0 || fly.x > width) fly.dx *= -1;
+        if (fly.y < 0 || fly.y > height) fly.dy *= -1;
+      }
+    }
+
+    function flyEscaped(fly) {
+      return !fly.bounce && (fly.x < -20 || fly.x > width + 20 || fly.y < -20 || fly.y > height + 20);
+    }
+
+    function drawFly(fly) {
+      fill(50);
+      ellipse(fly.x, fly.y, fly.size);
+    }
+
+    function flyInClapZone(fly) {
+      return dist(fly.x, fly.y, handX, handY) < 30;
+    }
+
+    function drawSquashes() {
+      let now = millis();
+      for (let i = squashes.length - 1; i >= 0; i--) {
+        let s = squashes[i];
+        if (now - s.timestamp < 1000) {
+          fill(255, 0, 0);
+          textSize(20);
+          text("💥 SQUASH!", s.x, s.y);
+        } else {
+          squashes.splice(i, 1);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
