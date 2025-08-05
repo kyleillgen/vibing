@@ -18,7 +18,8 @@
 
     let handX = 250;
     let handY = 250;
-    let handSpeed = 4;
+    const DEFAULT_HAND_SPEED = 4;
+    let handSpeed = DEFAULT_HAND_SPEED;
 
     let squashes = [];
 
@@ -51,7 +52,11 @@
     let activePowerUp = null;
     let activeEndsAt = 0;
     let nextPowerUpTime = 0;
-    let scoreMultiplier = 1;
+    const DEFAULT_SCORE_MULTIPLIER = 1;
+    let scoreMultiplier = DEFAULT_SCORE_MULTIPLIER;
+    const DEFAULT_CLAP_RADIUS = 30;
+    let clapRadius = DEFAULT_CLAP_RADIUS;
+    let fliesFrozen = false;
 
     function setup() {
       createCanvas(500, 500);
@@ -182,6 +187,8 @@
     }
 
     function moveFly(fly) {
+      if (fliesFrozen) return;
+
       fly.x += fly.dx;
       fly.y += fly.dy;
 
@@ -201,7 +208,7 @@
     }
 
     function flyInClapZone(fly) {
-      return dist(fly.x, fly.y, handX, handY) < 30;
+      return dist(fly.x, fly.y, handX, handY) < clapRadius;
     }
 
       function drawSquashes() {
@@ -223,7 +230,10 @@
 
         if (activePowerUp && now > activeEndsAt) {
           activePowerUp = null;
-          scoreMultiplier = 1;
+          scoreMultiplier = DEFAULT_SCORE_MULTIPLIER;
+          handSpeed = DEFAULT_HAND_SPEED;
+          clapRadius = DEFAULT_CLAP_RADIUS;
+          fliesFrozen = false;
           nextPowerUpTime = now + SPAWN_INTERVAL;
         }
 
@@ -238,7 +248,7 @@
           if (isClapping && dist(spawnPowerUp.x, spawnPowerUp.y, handX, handY) < POWER_UP_RADIUS + 10) {
             activePowerUp = spawnPowerUp;
             activeEndsAt = now + Math.min(activePowerUp.duration, 5) * 1000;
-            scoreMultiplier = multiplierForTier(activePowerUp.tier);
+            applyPowerUp(activePowerUp);
             spawnPowerUp = null;
           }
         }
@@ -273,18 +283,23 @@
         return null;
       }
 
-      function multiplierForTier(tier) {
-        switch (tier) {
-          case "Legendary":
-            return 5;
-          case "Epic":
-            return 4;
-          case "Rare":
-            return 3;
-          case "Uncommon":
-            return 2;
-          default:
-            return 1.5;
+      function applyPowerUp(powerUp) {
+        switch (powerUp.name) {
+          case "Score Frenzy":
+            scoreMultiplier = 5;
+            break;
+          case "Score Doubler":
+            scoreMultiplier = 2;
+            break;
+          case "Time Freeze":
+            fliesFrozen = true;
+            break;
+          case "Clap Magnet":
+            clapRadius = DEFAULT_CLAP_RADIUS * 2;
+            break;
+          case "Quick Hands":
+            handSpeed = DEFAULT_HAND_SPEED * 1.5;
+            break;
         }
       }
   </script>
