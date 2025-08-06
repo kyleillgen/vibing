@@ -26,26 +26,10 @@
     const POWER_UP_RADIUS = 20;
     const SPAWN_INTERVAL = 30000; // ms
     const POWER_UPS = [
-      { rank: 1,  name: "Score Frenzy",   effect: "+5x score per fly", tier: "Legendary", color: "#FFD700", duration: 45, rarity: 0.5 },
-      { rank: 2,  name: "Time Freeze",    effect: "Freezes flies in place", tier: "Legendary", color: "#FFD700", duration: 35, rarity: 1 },
-      { rank: 3,  name: "Score Doubler",  effect: "+2x score per fly", tier: "Epic",      color: "#A335EE", duration: 40, rarity: 2 },
-      { rank: 4,  name: "Clap Magnet",    effect: "Clap range doubled", tier: "Epic",      color: "#A335EE", duration: 30, rarity: 2.5 },
-      { rank: 5,  name: "Multi-Clap",     effect: "Claps hit all flies in range", tier: "Epic",      color: "#A335EE", duration: 30, rarity: 3 },
-      { rank: 6,  name: "Chain Reaction", effect: "One fly squash auto-kills nearby ones", tier: "Rare",      color: "#0070FF", duration: 25, rarity: 4 },
-      { rank: 7,  name: "Fly Vision",     effect: "Highlights flies in clap zone", tier: "Rare",      color: "#0070FF", duration: 25, rarity: 4.5 },
-      { rank: 8,  name: "Combo Master",   effect: "Bonus 10 pts every 3 hits", tier: "Rare",      color: "#0070FF", duration: 25, rarity: 5 },
-      { rank: 9,  name: "Score Trickler", effect: "Passive +1pt/sec", tier: "Rare",      color: "#0070FF", duration: 25, rarity: 6 },
-      { rank: 10, name: "Quick Hands",    effect: "Hand speed +50%", tier: "Uncommon", color: "#1EFF00", duration: 30, rarity: 7 },
-      { rank: 11, name: "Sticky Clap",    effect: "Clap hitbox persists 0.5s after key is released", tier: "Uncommon", color: "#1EFF00", duration: 30, rarity: 8 },
-      { rank: 12, name: "Mini Radar",     effect: "Arrows point toward closest fly", tier: "Uncommon", color: "#1EFF00", duration: 30, rarity: 8 },
-      { rank: 13, name: "Bonus Bomb",     effect: "Next squash = +30 pts", tier: "Uncommon", color: "#1EFF00", duration: 20, rarity: 8.5 },
-      { rank: 14, name: "Light Touch",    effect: "Clap radius slightly increased", tier: "Common",   color: "#FFFFFF", duration: 30, rarity: 10 },
-      { rank: 15, name: "Buzz Stopper",   effect: "Slows flies by 25%", tier: "Common",   color: "#FFFFFF", duration: 30, rarity: 11 },
-      { rank: 16, name: "Second Wind",    effect: "Next missed clap doesn’t cancel combo", tier: "Common",   color: "#FFFFFF", duration: 20, rarity: 12 },
-      { rank: 17, name: "Score Saver",    effect: "-50% point loss on failed clap", tier: "Common",   color: "#FFFFFF", duration: 20, rarity: 13 },
-      { rank: 18, name: "Mini Boost",     effect: "+5 bonus points per squash", tier: "Common",   color: "#FFFFFF", duration: 20, rarity: 14 },
-      { rank: 19, name: "Nudger",         effect: "Slightly nudges nearby flies toward center", tier: "Common",   color: "#FFFFFF", duration: 20, rarity: 14.5 },
-      { rank: 20, name: "No Slip",        effect: "Friction reduces hand drift", tier: "Common",   color: "#FFFFFF", duration: 20, rarity: 15 }
+      { rank: 1, name: "Score Frenzy", effect: "+5x score per fly", tier: "Legendary", color: "#FFD700", duration: 45, rarity: 0.5 },
+      { rank: 2, name: "Time Freeze", effect: "Freezes flies in place", tier: "Legendary", color: "#FFD700", duration: 35, rarity: 1 },
+      { rank: 3, name: "Clap Magnet", effect: "Clap range doubled", tier: "Epic", color: "#A335EE", duration: 30, rarity: 2.5 },
+      { rank: 4, name: "Quick Hands", effect: "Hand speed +50%", tier: "Uncommon", color: "#1EFF00", duration: 30, rarity: 7 }
     ];
 
     let spawnPowerUp = null;
@@ -292,9 +276,6 @@
       switch (powerUp.name) {
         case "Score Frenzy":
           scoreMultiplier = 5;
-          break;
-        case "Score Doubler":
-          scoreMultiplier = 2;
           break;
         case "Time Freeze":
           fliesFrozen = true;
